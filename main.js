@@ -1,4 +1,6 @@
-const THICKNESS = Math.pow(80, 2),
+const IMAGE_WIDTH = 1000,
+    IMAGE_HEIGHT = 600,
+    THICKNESS = Math.pow(80, 2),
     SPACING = 3,
     MARGIN = 100,
     COLOR = 220,
@@ -17,28 +19,24 @@ let container,
     d, t, f,
     a, b,
     i, n,
-    w, h,
     p, s,
     r, c;
 
 draw();
 
 function draw() {
-    const canvas = createCanvas();
+    const canvas = createCanvas('container-src', IMAGE_WIDTH, IMAGE_HEIGHT);
     const ctx = canvas.getContext('2d');
     const img = new Image();
 
     img.onload = function () {
-        const imageWidth = 1000;
-        const imageHeight = 600;
-
-        ctx.drawImage(img, 0, 0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
-        const imageData = ctx.getImageData(0, 0, imageWidth, imageHeight);
+        ctx.drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+        const imageData = ctx.getImageData(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
         particles = [];
 
-        for (let y = 0; y < imageHeight; y += 1) {
-            for (let x = 0; x < imageWidth * 4; x += 4) {
-                if (imageData.data[(y - 1) * imageWidth * 4 + x] === 104) {
+        for (let y = 0; y < IMAGE_HEIGHT; y += 1) {
+            for (let x = 0; x < IMAGE_WIDTH * 4; x += 4) {
+                if (imageData.data[(y - 1) * IMAGE_WIDTH * 4 + x] === 104) {
                     particles.push(Particle(x / 4, y));
                 }
             }
@@ -50,11 +48,11 @@ function draw() {
     img.src = './dotted-world-map.png';
 }
 
-function createCanvas() {
+function createCanvas(elId, width, height) {
     const canvas = document.createElement('canvas');
-    canvas.width = 1000;
-    canvas.height = 600;
-    document.getElementById('canvas-root').appendChild(canvas);
+    canvas.width = width;
+    canvas.height = height;
+    document.getElementById(elId).appendChild(canvas);
     return canvas;
 }
 
@@ -63,15 +61,11 @@ function Particle(x = 0, y = 0) {
 }
 
 function init() {
-    container = document.getElementById('container');
-    canvas = document.createElement('canvas');
-
+    const container = document.getElementById('container');
+    const canvas = createCanvas('container', IMAGE_WIDTH, IMAGE_HEIGHT);
     ctx = canvas.getContext('2d');
     man = false;
     tog = true;
-
-    w = canvas.width = 1000;
-    h = canvas.height = 600;
 
     container.addEventListener('mousemove', function (e) {
         bounds = container.getBoundingClientRect();
@@ -93,8 +87,8 @@ function step() {
     if (tog = !tog) {
         if (!man) {
             t = +new Date() * 0.001;
-            mx = w * 0.5 + (Math.cos(t * 2.1) * Math.cos(t * 0.9) * w * 0.45);
-            my = h * 0.5 + (Math.sin(t * 3.2) * Math.tan(Math.sin(t * 0.8)) * h * 0.45);
+            mx = IMAGE_WIDTH * 0.5 + (Math.cos(t * 2.1) * Math.cos(t * 0.9) * IMAGE_WIDTH * 0.45);
+            my = IMAGE_HEIGHT * 0.5 + (Math.sin(t * 3.2) * Math.tan(Math.sin(t * 0.8)) * IMAGE_HEIGHT * 0.45);
         }
 
         for (i = 0; i < particles.length; i++) {
@@ -112,11 +106,11 @@ function step() {
             p.y += (p.vy *= DRAG) + (p.oy - p.y) * EASE;
         }
     } else {
-        b = (a = ctx.createImageData(w, h)).data;
+        b = (a = ctx.createImageData(IMAGE_WIDTH, IMAGE_HEIGHT)).data;
 
         for (i = 0; i < particles.length; i++) {
             p = particles[i];
-            b[n = (~~p.x + (~~p.y * w)) * 4] = b[n + 1] = b[n + 2] = COLOR, b[n + 3] = 255;
+            b[n = (~~p.x + (~~p.y * IMAGE_WIDTH)) * 4] = b[n + 1] = b[n + 2] = COLOR, b[n + 3] = 255;
         }
 
         ctx.putImageData(a, 0, 0);
