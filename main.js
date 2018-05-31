@@ -8,7 +8,6 @@ let NUM_PARTICLES = ((ROWS = 100) * (COLS = 300)),
 
 let container,
     canvas,
-    mouse,
     stats,
     list,
     ctx,
@@ -64,7 +63,7 @@ function createCanvas() {
 }
 
 function Particle(x = 0, y = 0) {
-    return { vx: x, vy: y, x, y, ox: 0, oy: 0 };
+    return { vx: 0, vy: 0, x, y, ox: x, oy: y };
 }
 
 function init() {
@@ -77,13 +76,6 @@ function init() {
 
     w = canvas.width = 1000;
     h = canvas.height = 600;
-
-    // for (i = 0; i < NUM_PARTICLES; i++) {
-    //     p = Particle();
-    //     p.x = p.ox = MARGIN + SPACING * (i % COLS);
-    //     p.y = p.oy = MARGIN + SPACING * Math.floor(i / COLS);
-    //     list[i] = p;
-    // }
 
     container.addEventListener('mousemove', function (e) {
         bounds = container.getBoundingClientRect();
