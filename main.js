@@ -1,70 +1,12 @@
-draw();
-
-function draw() {
-    const canvas = createCanvas();
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-
-    img.onload = function () {
-        // Change the globalCompositeOperation to destination-over so that anything
-        // that is drawn on to the canvas from this point on is drawn at the back
-        // of whats already on the canvas
-        // ctx.globalCompositeOperation = 'destination-over';
-        ctx.drawImage(img, 0, 0, 1000, 600, 0, 0, 1000, 600);
-        const imageData = ctx.getImageData(0, 0, 1000, 600);
-        const imageWidth = imageData.width;
-        const imageHeight = imageData.height;
-        const result = [];
-
-        for (let y = 0; y < imageHeight; y += 1) {
-            for (let x = 0; x < imageWidth * 4; x += 4) {
-                if (imageData.data[(y - 1) * imageWidth * 4 + x] === 104) {
-                    result.push({ x: x / 4, y });
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(x / 4, y, 1, 1);
-                }
-            }
-        }
-
-        console.log(imageData);
-        console.log(result);
-    };
-    img.src = './dotted-world-map.png';
-
-    // Now return the globalCompositeOperation to source-over and draw a filled circle
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.beginPath();
-    ctx.fillStyle = 'white';
-    ctx.arc(100, 175, 10, 0, 2 * Math.PI);
-    ctx.fill();
-}
-
-function createCanvas() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1000;
-    canvas.height = 600;
-    document.getElementById('canvas-root').appendChild(canvas);
-    return canvas;
-}
-
-var NUM_PARTICLES = ( ( ROWS = 100 ) * ( COLS = 300 ) ),
-    THICKNESS = Math.pow( 80, 2 ),
+let NUM_PARTICLES = ((ROWS = 100) * (COLS = 300)),
+    THICKNESS = Math.pow(80, 2),
     SPACING = 3,
     MARGIN = 100,
     COLOR = 220,
     DRAG = 0.95,
-    EASE = 0.25,
-    
-    /*
-    
-    used for sine approximation, but Math.sin in Chrome is still fast enough :)http://jsperf.com/math-sin-vs-sine-approximation
-    B = 4 / Math.PI,
-    C = -4 / Math.pow( Math.PI, 2 ),
-    P = 0.225,
-    */
+    EASE = 0.25;
 
-    container,
-    particle,
+let container,
     canvas,
     mouse,
     stats,
@@ -79,106 +21,120 @@ var NUM_PARTICLES = ( ( ROWS = 100 ) * ( COLS = 300 ) ),
     i, n,
     w, h,
     p, s,
-    r, c
-    ;
+    r, c;
 
-particle = {
-  vx: 0,
-  vy: 0,
-  x: 0,
-  y: 0
-};
+draw();
+
+function draw() {
+    const canvas = createCanvas();
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = function () {
+        const imageWidth = 1000;
+        const imageHeight = 600;
+
+        ctx.drawImage(img, 0, 0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
+        const imageData = ctx.getImageData(0, 0, imageWidth, imageHeight);
+        list = [];
+
+        for (let y = 0; y < imageHeight; y += 1) {
+            for (let x = 0; x < imageWidth * 4; x += 4) {
+                if (imageData.data[(y - 1) * imageWidth * 4 + x] === 104) {
+                    list.push(Particle(x / 4, y));
+                    NUM_PARTICLES = list.length;
+                    // ctx.fillStyle = 'rebeccapurple';
+                    // ctx.fillRect(x / 4, y, 1, 1);
+                }
+            }
+        }
+
+        init();
+        step();
+    };
+    img.src = './dotted-world-map.png';
+}
+
+function createCanvas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1000;
+    canvas.height = 600;
+    document.getElementById('canvas-root').appendChild(canvas);
+    return canvas;
+}
+
+function Particle(x = 0, y = 0) {
+    return { vx: x, vy: y, x, y, ox: 0, oy: 0 };
+}
 
 function init() {
+    container = document.getElementById('container');
+    canvas = document.createElement('canvas');
 
-  container = document.getElementById( 'container' );
-  canvas = document.createElement( 'canvas' );
-  
-  ctx = canvas.getContext( '2d' );
-  man = false;
-  tog = true;
-  
-  list = [];
-  
-  w = canvas.width = COLS * SPACING + MARGIN * 2;
-  h = canvas.height = ROWS * SPACING + MARGIN * 2;
-  
-  container.style.marginLeft = Math.round( w * -0.5 ) + 'px';
-  container.style.marginTop = Math.round( h * -0.5 ) + 'px';
-  
-  for ( i = 0; i < NUM_PARTICLES; i++ ) {
-    
-    p = Object.create( particle );
-    p.x = p.ox = MARGIN + SPACING * ( i % COLS );
-    p.y = p.oy = MARGIN + SPACING * Math.floor( i / COLS );
-    
-    list[i] = p;
-  }
+    ctx = canvas.getContext('2d');
+    man = false;
+    tog = true;
 
-  container.addEventListener( 'mousemove', function(e) {
+    w = canvas.width = 1000;
+    h = canvas.height = 600;
 
-    bounds = container.getBoundingClientRect();
-    mx = e.clientX - bounds.left;
-    my = e.clientY - bounds.top;
-    man = true;
-    
-  });
-  
-  if ( typeof Stats === 'function' ) {
-    document.body.appendChild( ( stats = new Stats() ).domElement );
-  }
-  
-  container.appendChild( canvas );
+    // for (i = 0; i < NUM_PARTICLES; i++) {
+    //     p = Particle();
+    //     p.x = p.ox = MARGIN + SPACING * (i % COLS);
+    //     p.y = p.oy = MARGIN + SPACING * Math.floor(i / COLS);
+    //     list[i] = p;
+    // }
+
+    container.addEventListener('mousemove', function (e) {
+        bounds = container.getBoundingClientRect();
+        mx = e.clientX - bounds.left;
+        my = e.clientY - bounds.top;
+        man = true;
+    });
+
+    if (typeof Stats === 'function') {
+        document.body.appendChild((stats = new Stats()).domElement);
+    }
+
+    container.appendChild(canvas);
 }
 
 function step() {
+    if (stats) stats.begin();
 
-  if ( stats ) stats.begin();
+    if (tog = !tog) {
+        if (!man) {
+            t = +new Date() * 0.001;
+            mx = w * 0.5 + (Math.cos(t * 2.1) * Math.cos(t * 0.9) * w * 0.45);
+            my = h * 0.5 + (Math.sin(t * 3.2) * Math.tan(Math.sin(t * 0.8)) * h * 0.45);
+        }
 
-  if ( tog = !tog ) {
+        for (i = 0; i < NUM_PARTICLES; i++) {
+            p = list[i];
+            d = (dx = mx - p.x) * dx + (dy = my - p.y) * dy;
+            f = -THICKNESS / d;
 
-    if ( !man ) {
+            if (d < THICKNESS) {
+                t = Math.atan2(dy, dx);
+                p.vx += f * Math.cos(t);
+                p.vy += f * Math.sin(t);
+            }
 
-      t = +new Date() * 0.001;
-      mx = w * 0.5 + ( Math.cos( t * 2.1 ) * Math.cos( t * 0.9 ) * w * 0.45 );
-      my = h * 0.5 + ( Math.sin( t * 3.2 ) * Math.tan( Math.sin( t * 0.8 ) ) * h * 0.45 );
-    }
-      
-    for ( i = 0; i < NUM_PARTICLES; i++ ) {
-      
-      p = list[i];
-      
-      d = ( dx = mx - p.x ) * dx + ( dy = my - p.y ) * dy;
-      f = -THICKNESS / d;
+            p.x += (p.vx *= DRAG) + (p.ox - p.x) * EASE;
+            p.y += (p.vy *= DRAG) + (p.oy - p.y) * EASE;
+        }
+    } else {
+        b = (a = ctx.createImageData(w, h)).data;
 
-      if ( d < THICKNESS ) {
-        t = Math.atan2( dy, dx );
-        p.vx += f * Math.cos(t);
-        p.vy += f * Math.sin(t);
-      }
+        for (i = 0; i < NUM_PARTICLES; i++) {
+            p = list[i];
+            b[n = (~~p.x + (~~p.y * w)) * 4] = b[n + 1] = b[n + 2] = COLOR, b[n + 3] = 255;
+        }
 
-      p.x += ( p.vx *= DRAG ) + (p.ox - p.x) * EASE;
-      p.y += ( p.vy *= DRAG ) + (p.oy - p.y) * EASE;
-
-    }
-
-  } else {
-
-    b = ( a = ctx.createImageData( w, h ) ).data;
-
-    for ( i = 0; i < NUM_PARTICLES; i++ ) {
-
-      p = list[i];
-      b[n = ( ~~p.x + ( ~~p.y * w ) ) * 4] = b[n+1] = b[n+2] = COLOR, b[n+3] = 255;
+        ctx.putImageData(a, 0, 0);
     }
 
-    ctx.putImageData( a, 0, 0 );
-  }
+    if (stats) stats.end();
 
-  if ( stats ) stats.end();
-
-  requestAnimationFrame( step );
+    requestAnimationFrame(step);
 }
-
-init();
-step();

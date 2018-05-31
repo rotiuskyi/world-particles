@@ -5,11 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Canvas</title>
-    <script src="./main.js" defer></script>
+    <style>
+        .wrap {
+            position: relative;
+            margin: 0 auto;
+            width: 1000px;
+            height: 600px;
+        }
+        #canvas-root,
+        #container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1000px;
+            height: 600px;
+        }
+        .title {
+            margin: 0 auto;
+            width: 1000px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1 style="width: 50%; margin: 0 auto; text-align: center;">Canvas</h1>
-    <div id="canvas-root" style="width: 50%; margin: 0 auto;"></div>
-    <div id="container"></div>
+    <h1 class="title">Canvas</h1>
+    <div class="wrap">
+        <div id="canvas-root"></div>
+        <div id="container"></div>
+    </div>
+
+    <script src="./main.js"></script>
 </body>
 </html>
