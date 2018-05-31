@@ -1,5 +1,4 @@
-let NUM_PARTICLES = ((ROWS = 100) * (COLS = 300)),
-    THICKNESS = Math.pow(80, 2),
+const THICKNESS = Math.pow(80, 2),
     SPACING = 3,
     MARGIN = 100,
     COLOR = 220,
@@ -9,7 +8,7 @@ let NUM_PARTICLES = ((ROWS = 100) * (COLS = 300)),
 let container,
     canvas,
     stats,
-    list,
+    particles,
     ctx,
     tog,
     man,
@@ -35,15 +34,12 @@ function draw() {
 
         ctx.drawImage(img, 0, 0, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
         const imageData = ctx.getImageData(0, 0, imageWidth, imageHeight);
-        list = [];
+        particles = [];
 
         for (let y = 0; y < imageHeight; y += 1) {
             for (let x = 0; x < imageWidth * 4; x += 4) {
                 if (imageData.data[(y - 1) * imageWidth * 4 + x] === 104) {
-                    list.push(Particle(x / 4, y));
-                    NUM_PARTICLES = list.length;
-                    // ctx.fillStyle = 'rebeccapurple';
-                    // ctx.fillRect(x / 4, y, 1, 1);
+                    particles.push(Particle(x / 4, y));
                 }
             }
         }
@@ -101,8 +97,8 @@ function step() {
             my = h * 0.5 + (Math.sin(t * 3.2) * Math.tan(Math.sin(t * 0.8)) * h * 0.45);
         }
 
-        for (i = 0; i < NUM_PARTICLES; i++) {
-            p = list[i];
+        for (i = 0; i < particles.length; i++) {
+            p = particles[i];
             d = (dx = mx - p.x) * dx + (dy = my - p.y) * dy;
             f = -THICKNESS / d;
 
@@ -118,8 +114,8 @@ function step() {
     } else {
         b = (a = ctx.createImageData(w, h)).data;
 
-        for (i = 0; i < NUM_PARTICLES; i++) {
-            p = list[i];
+        for (i = 0; i < particles.length; i++) {
+            p = particles[i];
             b[n = (~~p.x + (~~p.y * w)) * 4] = b[n + 1] = b[n + 2] = COLOR, b[n + 3] = 255;
         }
 
