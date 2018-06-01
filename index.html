@@ -6,37 +6,20 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>World Particles</title>
     <style>
-        .wrap {
-            position: relative;
+        #container {
             margin: 0 auto;
             width: 1000px;
             height: 600px;
-        }
-        #container-src,
-        #container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 1000px;
-            height: 600px;
-        }
-        #container {
             background-color: darkslategray;
-        }
-        .title {
-            margin: 0 auto;
-            width: 1000px;
             text-align: center;
+            color: white;
         }
     </style>
+    <script src="./main.js" defer></script>
 </head>
 <body>
-    <h1 class="title">World Particles</h1>
-    <div class="wrap">
-        <div id="container-src"></div>
-        <div id="container"></div>
+    <div id="container">
+        <h1>World Particles</h1>
     </div>
-
-    <script src="./main.js"></script>
 </body>
 </html>
